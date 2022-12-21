@@ -1,9 +1,13 @@
 package com.example.demo;
 
+import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -17,35 +21,33 @@ public class Application {
     @Bean
     CommandLineRunner commandLineRunner(StudentRepository studentRepository) {
         return args -> {
-            Student student1 = new Student(
-                    "Maria",
-                    "Jones",
-                    "maria.jones@gmail.com",
-                    24
-            );
-            Student student2 = new Student(
-                    "Ahmed",
-                    "Ali",
-                    "ahmed.ali@gmail.com",
-                    24
-            );
-            Student student3 = new Student(
-                    "Maria",
-                    "Something",
-                    "maria2.jones@gmail.com",
-                    25
-            );
-            System.out.println("Adding Maria and Ahmed");
-            studentRepository.saveAll(List.of(student1, student2, student3));
-
-//            studentRepository
-//                    .findStudentByEmail("ahmed.ali@gmail.com")
-//                    .ifPresentOrElse(System.out::println, ()-> System.out.println("Studnet with email that not found"));
-
-            studentRepository.findStudentsByFirstNameEqualsAndAgeGreaterThanEqualNativeNamedParams("Maria", 24)
-                    .forEach(System.out::println);
-
-            System.out.println(studentRepository.deleteStudentById(1L)); 
+            generateRandomStudents(studentRepository);
+//            sorting(studentRepository);
+            PageRequest pageRequest = PageRequest.of(0,5, Sort.by("age").ascending());
+            Page<Student> page = studentRepository.findAll(pageRequest);
+            System.out.println(page);
         };
+    }
+
+    private static void sorting (StudentRepository studentRepository) {
+        Sort sort = Sort.by("firstName").ascending().and(Sort.by("age").descending());
+        studentRepository.findAll(sort)
+                .forEach((s) -> System.out.println(s.getFirstName() + " " + s.getAge()));
+    }
+
+    private static void generateRandomStudents(StudentRepository studentRepository) {
+        Faker faker = new Faker();
+        for (int i = 0; i < 20; i++) {
+            String firstName = faker.name().firstName();
+            String lastName = faker.name().lastName();
+            String email = String.format("%s.%s@gmail.com", firstName.toLowerCase(), lastName.toLowerCase());
+            Student student = new Student(
+                    firstName,
+                    lastName,
+                    email,
+                    faker.number().numberBetween(17, 55)
+            );
+            studentRepository.save(student);
+        }
     }
 }
