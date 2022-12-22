@@ -35,23 +35,35 @@ public class Application {
                     faker.number().numberBetween(17, 55)
             );
 
-            studentRepository.save(student);
+            student.addBook(new Book("Clean Code"));
+            student.addBook(new Book("Think and Grow Rich"));
+            student.addBook(new Book("Spring and Data Jpa"));
+
             StudentIdCard studentIdCard = new StudentIdCard("123456789", student);
-            studentIdCardRepository.save(studentIdCard);
 
-            studentRepository.findById(1L).ifPresent(System.out::println );
+            student.setStudentIdCard(studentIdCard);
 
-            studentIdCardRepository.deleteById(1L);
+            studentRepository.save(student);
+
+            studentRepository.findById(1L).ifPresent(s -> {
+                System.out.println("fetch books lazy...");
+                List<Book> books = student.getBooks();
+                books.forEach(book -> {
+                    System.out.println(s.getFirstName() + " borrowed " + book.getBookName());
+                });
+            });
+
+//            studentIdCardRepository.deleteById(1L);
         };
     }
 
     private static void paging(StudentRepository studentRepository) {
-        PageRequest pageRequest = PageRequest.of(0,5, Sort.by("age").ascending());
+        PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("age").ascending());
         Page<Student> page = studentRepository.findAll(pageRequest);
         System.out.println(page);
     }
 
-    private static void sorting (StudentRepository studentRepository) {
+    private static void sorting(StudentRepository studentRepository) {
         Sort sort = Sort.by("firstName").ascending().and(Sort.by("age").descending());
         studentRepository.findAll(sort)
                 .forEach((s) -> System.out.println(s.getFirstName() + " " + s.getAge()));

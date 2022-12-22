@@ -1,6 +1,8 @@
 package com.example.demo;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "Student")
 @Table(
@@ -47,9 +49,17 @@ public class Student {
     private Integer age;
     @OneToOne(
             mappedBy = "student",
-            orphanRemoval = true
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE}
     )
     private StudentIdCard studentIdCard;
+
+    @OneToMany(
+            mappedBy = "student",
+            orphanRemoval = true,
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE}
+//            fetch = FetchType.EAGER
+    )
+    private List<Book> books = new ArrayList<>();
 
     public Student(Long id, String firstName, String lastName, String email, Integer age) {
         this.id = id;
@@ -110,6 +120,32 @@ public class Student {
         this.age = age;
     }
 
+    public StudentIdCard getStudentIdCard() {
+        return studentIdCard;
+    }
+
+    public void setStudentIdCard(StudentIdCard studentIdCard) {
+        this.studentIdCard = studentIdCard;
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public void addBook(Book book){
+        if(!this.books.contains(book)){
+            this.books.add(book);
+            book.setStudent(this);
+        }
+    }
+
+    public void removeBook(Book book){
+        if(this.books.contains(book)){
+            this.books.remove(book);
+            book.setStudent(null);
+        }
+    }
+
     @Override
     public String toString() {
         return "Student{" +
@@ -120,4 +156,5 @@ public class Student {
                 ", age=" + age +
                 '}';
     }
+
 }
