@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SpringBootApplication
@@ -42,6 +43,17 @@ public class Application {
             StudentIdCard studentIdCard = new StudentIdCard("123456789", student);
 
             student.setStudentIdCard(studentIdCard);
+
+            Course course1 = new Course("Computer Science", "IT");
+//            student.addEnrolment(new Enrolment(new EnrolmentId(student.getId(), 1L), student, course1));
+            student.addEnrolment(new Enrolment(student, course1, LocalDateTime.now().minusDays(18)));
+
+            Course course2 = new Course("Spring Data Jpa", "IT");
+//            student.addEnrolment(new Enrolment(new EnrolmentId(student.getId(), 2L), student, course2));
+            student.addEnrolment(new Enrolment(student, course2, LocalDateTime.now().minusDays(18)));
+
+//            student.enrolToCourse(new Course("Computer Science", "IT"));
+//            student.enrolToCourse(new Course("Spring Data Jpa", "IT"));
 
             studentRepository.save(student);
 
